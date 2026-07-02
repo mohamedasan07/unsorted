@@ -1,0 +1,105 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Baggy Oversized Tee",
+      "description": "",
+      "category": "",
+      "price": 999,
+      "oldPrice": 0,
+      "imageUrl": "https://images.pexels.com/photos/9042261/pexels-photo-9042261.jpeg?auto=compress&cs=tinysrgb&w=700",
+      "stockQuantity": 50,
+      "sale": false
+    },
+    {
+      "id": 2,
+      "name": "Street Baggy Knit",
+      "description": "",
+      "category": "",
+      "price": 1399,
+      "oldPrice": 0,
+      "imageUrl": "https://images.pexels.com/photos/1019363/pexels-photo-1019363.jpeg?auto=compress&cs=tinysrgb&w=700",
+      "stockQuantity": 50,
+      "sale": false
+    },
+    {
+      "id": 3,
+      "name": "Baggy Mesh Layer",
+      "description": "",
+      "category": "",
+      "price": 899,
+      "oldPrice": 0,
+      "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80",
+      "stockQuantity": 50,
+      "sale": false
+    },
+    {
+      "id": 4,
+      "name": "Baggy Heavy Jersey",
+      "description": "",
+      "category": "",
+      "price": 1649,
+      "oldPrice": 0,
+      "imageUrl": "mexico.jpg.jpeg",
+      "stockQuantity": 50,
+      "sale": false
+    },
+    {
+      "id": 16,
+      "name": "Thrift Bucket Hat",
+      "description": "",
+      "category": "accessories",
+      "price": 1490,
+      "oldPrice": 1990,
+      "imageUrl": "accessory1_cap.jpg.jpeg",
+      "stockQuantity": 50,
+      "sale": true
+    },
+    {
+      "id": 17,
+      "name": "Retro Sunglasses",
+      "description": "",
+      "category": "accessories",
+      "price": 1299,
+      "oldPrice": 1799,
+      "imageUrl": "accessory2_belt.jpg.jpeg",
+      "stockQuantity": 50,
+      "sale": false
+    },
+    {
+      "id": 18,
+      "name": "Chunky Chain Necklace",
+      "description": "",
+      "category": "accessories",
+      "price": 3149,
+      "oldPrice": 3999,
+      "imageUrl": "accessory3_bag.jpg.jpeg",
+      "stockQuantity": 50,
+      "sale": true
+    },
+    {
+      "id": 19,
+      "name": "Canvas Crossbody Bag",
+      "description": "",
+      "category": "accessories",
+      "price": 3999,
+      "oldPrice": 4999,
+      "imageUrl": "accessory4_hat.jpg.jpeg",
+      "stockQuantity": 50,
+      "sale": false
+    }
+  ],
+  "orders": [],
+  "users": [
+    {
+      "id": 1,
+      "name": "Demo User",
+      "email": "user@unsorted.com",
+      "role": "customer"
+    }
+  ],
+  "meta": {
+    "createdAt": "2026-05-23T00:00:00.000Z",
+    "version": 1
+  }
+}

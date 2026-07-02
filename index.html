@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theunsorted | Premium Streetwear</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Menu Sidebar -->
+  <div class="menu" id="menu">
+    <a href="#hero">Home</a>
+    <a href="#categories">Category</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#reviews">Review</a>
+    <a onclick="toggleLogin(); return false;">Login</a>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="login-modal" id="loginModal">
+    <div class="login-content">
+      <h2>Login</h2>
+      <input type="email" placeholder="Email">
+      <input type="password" placeholder="Password">
+      <button>Sign In</button>
+      <p style="margin-top: 20px; font-size: 14px; color: rgba(255,255,255,0.7);">Don't have an account? <a href="#" style="color: #ff4757;">Sign up</a></p>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cartOverlay" aria-hidden="true"></div>
+
+  <aside class="cart-sidebar" id="cartSidebar" aria-label="Shopping cart" aria-hidden="true">
+    <div class="cart-header">
+      <h2>Shopping Cart</h2>
+      <button type="button" class="cart-close" id="cartCloseBtn" aria-label="Close cart">✕</button>
+    </div>
+
+    <div id="cartItems" class="cart-items"></div>
+
+    <div class="cart-footer">
+      <div class="cart-subtotal-row">
+        <span>Subtotal</span>
+        <strong id="cartTotal">₹0</strong>
+      </div>
+      <button id="checkoutBtn" class="btn-checkout">Checkout</button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="header">
+    <!-- Left: Hamburger -->
+    <div class="left" onclick="toggleMenu()">
+      <i class="fas fa-bars" style="font-size: 24px;"></i>
+    </div>
+
+    <!-- Center: Brand Logo Image -->
+    <div class="logo">
+      <img src="image1.jpeg" alt="theunsorted" style="height: 60px; width: auto; display: block; margin: 0 auto;">
+    </div>
+
+    <!-- Right: Icons -->
+    <div class="right">
+      <i class="fas fa-search" onclick="toggleSearch()"></i>
+<div style="position: relative;">        <i class="fas fa-shopping-cart" id="cartOpenBtn" style="font-size: 20px;" onclick="toggleCart()"></i>
+        <div class="cart-badge" id="cartBadge">0</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Modal -->
+  <div class="search-modal" id="searchModal">
+    <input type="text" placeholder="Search streetwear...">
+  </div>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <h1>UNSORTED FITS.</h1>
+    <h1>RAW STYLE.</h1>
+    <p class="hero-tagline">"Unsorted fits. Unlimited vibe."</p>
+    <button class="btn">Browse Bestseller</button>
+  </section>
+
+  <!-- Categories -->
+  <section class="sale-products" id="categories">
+
+    <div class="sale-products-header">
+      <h2 class="sale-products-title">JERSEYS</h2>
+    </div>
+
+<!-- Product details modal (premium dark UNSORTED) -->
+    <div class="product-modal-overlay" id="productModalOverlay" aria-hidden="true"></div>
+    <div class="product-modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+      <button class="product-modal-close" id="productModalCloseBtn" type="button" aria-label="Close product details">✕</button>
+
+
+      <div class="product-modal-grid">
+        <div class="product-modal-media">
+          <img id="productModalImage" class="product-modal-image" alt="Product" />
+        </div>
+
+        <div class="product-modal-content">
+          <div class="product-modal-category" id="productModalCategory"></div>
+          <h2 class="product-modal-title" id="productModalTitle"></h2>
+
+          <div class="product-modal-prices">
+            <div class="product-modal-old" id="productModalOldPrice"></div>
+            <div class="product-modal-price" id="productModalPrice"></div>
+          </div>
+
+          <p class="product-modal-description" id="productModalDescription"></p>
+
+          <button class="add-to-cart product-modal-add" id="productModalAddToCart" type="button">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sale-products-grid">
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img">
+          <img src="mexico.jpg.jpeg" alt="Jersey Tee" />
+        </div>
+        <div class="sale-info">
+          <div class="sale-name">Jersey Tee</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,399</div>
+            <div class="sale-discount">₹ 1,200</div>
+
+          </div>
+          <button class="add-to-cart" data-id="24" data-name="Jersey Tee" data-price="1200" data-image="mexico.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="nakada.jpg.jpeg" alt="Striped Knit" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Striped Knit</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,899</div>
+            <div class="sale-discount">₹ 1,550</div>
+
+          </div>
+          <button class="add-to-cart" data-id="25" data-name="Striped Knit" data-price="1550" data-image="nakada.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="acmilan.jpg.jpeg" alt="Premium Oversized Jersey" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Premium Oversized Jersey</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,099</div>
+            <div class="sale-discount">₹ 1,999</div>
+
+          </div>
+          <button class="add-to-cart" data-id="26" data-name="Premium Oversized Jersey" data-price="1799" data-image="acmilan.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="pirally.jpg.jpeg" alt="Ribbed Crew Jersey" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Ribbed Crew Jersey</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,999</div>
+            <div class="sale-discount">₹ 1,999</div>
+
+          </div>
+          <button class="add-to-cart" data-id="27" data-name="Ribbed Crew Jersey" data-price="2050" data-image="pirally.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+
+
+    </div>
+
+    <div class="view-all-wrap">
+      <button class="view-all-btn" type="button">VIEW ALL</button>
+    </div>
+
+  </section>
+
+  <!-- Baggy Collection -->
+  <section class="sale-products" id="Baggy">
+    <div class="sale-products-header">
+      <h2 class="sale-products-title">BAGGY</h2>
+    </div>
+
+    <div class="sale-products-grid">
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img">
+          <img src="baggy 1.jpg" alt="Baggy Oversized Tee" />
+        </div>
+        <div class="sale-info">
+          <div class="sale-name">Baggy Oversized Tee</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,299</div>
+            <div class="sale-discount">₹ 999</div>
+          </div>
+          <button class="add-to-cart" data-id="1" data-name="Baggy Oversized Tee" data-price="999" data-image="baggy 1.jpg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img">
+          <img src="baggy 2 copy.jpg" alt="Street Baggy Knit" />
+        </div>
+        <div class="sale-info">
+          <div class="sale-name">Street Baggy Knit</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,799</div>
+            <div class="sale-discount">₹ 1,399</div>
+          </div>
+          <button class="add-to-cart" data-id="2" data-name="Street Baggy Knit" data-price="1399" data-image="baggy 2 copy.jpg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img">
+          <img src="baggy 3.jpg" alt="Baggy Mesh Layer" />
+        </div>
+        <div class="sale-info">
+          <div class="sale-name">Baggy Mesh Layer</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,199</div>
+            <div class="sale-discount">₹ 899</div>
+          </div>
+          <button class="add-to-cart" data-id="3" data-name="Baggy Mesh Layer" data-price="899" data-image="baggy 3.jpg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img">
+          <img src="LFDY Baggy Denim - LFDY Baggy Denim.jpg" alt="Baggy Heavy Jersey" />
+        </div>
+        <div class="sale-info">
+          <div class="sale-name">Baggy Heavy Jersey</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,099</div>
+            <div class="sale-discount">₹ 1,649</div>
+          </div>
+          <button class="add-to-cart" data-id="4" data-name="Baggy Heavy Jersey" data-price="1649" data-image="LFDY Baggy Denim - LFDY Baggy Denim.jpg">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view-all-wrap">
+      <button class="view-all-btn" type="button">VIEW ALL</button>
+    </div>
+  </section>
+
+  <!-- Shirts Collection -->
+  <section class="sale-products" id="shirts">
+    <div class="sale-products-header">
+      <h2 class="sale-products-title">SHIRTS</h2>
+    </div>
+
+    <div class="sale-products-grid">
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="shirt 1.jpg" alt="Button-Up Overshirt" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Button-Up Overshirt</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,499</div>
+            <div class="sale-discount">₹ 1,999</div>
+
+          </div>
+          <button class="add-to-cart" data-id="8" data-name="Button-Up Overshirt" data-price="1999" data-image="shirt 1.jpg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="shirt 2.jpg" alt="Flannel Work Shirt" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Flannel Work Shirt</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,799</div>
+            <div class="sale-discount">₹ 1,299</div>
+          </div>
+          <button class="add-to-cart" data-id="9" data-name="Flannel Work Shirt" data-price="1299" data-image="shirt 2.jpg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="shirt 3.jpg" alt="Hawaiian Shirt" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Hawaiian Shirt</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,099</div>
+            <div class="sale-discount">₹ 1,649</div>
+          </div>
+          <button class="add-to-cart" data-id="10" data-name="Hawaiian Shirt" data-price="1649" data-image="shirt 3.jpg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="Ralph Lauren.jpg" alt="Oxford Shirt" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Oxford Shirt</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,499</div>
+            <div class="sale-discount">₹ 1,899</div>
+          </div>
+          <button class="add-to-cart" data-id="11" data-name="Oxford Shirt" data-price="1899" data-image="Ralph Lauren.jpg">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view-all-wrap">
+      <button class="view-all-btn" type="button">VIEW ALL</button>
+    </div>
+  </section>
+
+  <!-- T-Shirts Collection -->
+  <section class="sale-products" id="tshirts">
+    <div class="sale-products-header">
+      <h2 class="sale-products-title">T-SHIRTS</h2>
+    </div>
+
+    <div class="sale-products-grid">
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="tshirt 1.jpeg" alt="Graphic Tee" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Graphic Tee</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,199</div>
+            <div class="sale-discount">₹ 1,599</div>
+          </div>
+          <button class="add-to-cart" data-id="12" data-name="Graphic Tee" data-price="1599" data-image="tshirt 1.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="tshirt 2.jpeg" alt="Pocket Tee" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Pocket Tee</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,999</div>
+            <div class="sale-discount">₹ 1,449</div>
+          </div>
+          <button class="add-to-cart" data-id="13" data-name="Pocket Tee" data-price="1449" data-image="tshirt 2.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="tshirt 3.jpeg" alt="Vintage Wash Tee" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Vintage Wash Tee</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,899</div>
+            <div class="sale-discount">₹ 2,099</div>
+          </div>
+          <button class="add-to-cart" data-id="14" data-name="Vintage Wash Tee" data-price="2099" data-image="tshirt 3.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="tshirt 4.jpg" alt="Crewneck Basic" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Crewneck Basic</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 2,999</div>
+            <div class="sale-discount">₹ 2,399</div>
+          </div>
+          <button class="add-to-cart" data-id="15" data-name="Crewneck Basic" data-price="2399" data-image="tshirt 4.jpg">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view-all-wrap">
+      <button class="view-all-btn" type="button">VIEW ALL</button>
+    </div>
+  </section>
+
+  <!-- Accessories Collection -->
+  <section class="sale-products" id="accessories">
+    <div class="sale-products-header">
+      <h2 class="sale-products-title">ACCESSORIES</h2>
+    </div>
+
+    <div class="sale-products-grid">
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="accessory1_cap.jpg.jpeg" alt="Thrift Bucket Hat" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Thrift Bucket Hat</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,990</div>
+            <div class="sale-discount">₹ 1,490</div>
+          </div>
+          <button class="add-to-cart" data-id="16" data-name="Thrift Bucket Hat" data-price="1490" data-image="accessory1_cap.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="accessory2_belt.jpg.jpeg" alt="Retro Sunglasses" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Retro Sunglasses</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,799</div>
+            <div class="sale-discount">₹ 1,299</div>
+          </div>
+          <button class="add-to-cart" data-id="17" data-name="Retro Sunglasses" data-price="1299" data-image="accessory2_belt.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="accessory3_bag.jpg.jpeg" alt="Chunky Chain Necklace" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Chunky Chain Necklace</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 3,999</div>
+            <div class="sale-discount">₹ 3,149</div>
+          </div>
+          <button class="add-to-cart" data-id="18" data-name="Chunky Chain Necklace" data-price="3149" data-image="accessory3_bag.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="accessory4_hat.jpg.jpeg" alt="Canvas Crossbody Bag" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Canvas Crossbody Bag</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 4,999</div>
+            <div class="sale-discount">₹ 3,999</div>
+          </div>
+          <button class="add-to-cart" data-id="19" data-name="Canvas Crossbody Bag" data-price="3999" data-image="accessory4_hat.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view-all-wrap">
+      <button class="view-all-btn" type="button">VIEW ALL</button>
+    </div>
+  </section>
+
+  <!-- Bestseller Collection -->
+  <section class="sale-products" id="bestseller">
+    <div class="sale-products-header">
+      <h2 class="sale-products-title">BEST SELLERS</h2>
+    </div>
+
+    <div class="sale-products-grid">
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="mexico.jpg.jpeg" alt="Vintage Bestseller Tee" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Vintage Bestseller Tee</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 1,299</div>
+            <div class="sale-discount">₹ 999</div>
+          </div>
+          <button class="add-to-cart" data-id="20" data-name="Vintage Bestseller Tee" data-price="999" data-image="mexico.jpg.jpeg">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="https://images.unsplash.com/photo-1520975958225-4d1e8f4f7c18?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80" alt="Iconic Hoodie" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Iconic Hoodie</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 4,499</div>
+            <div class="sale-discount">₹ 3,699</div>
+          </div>
+          <button class="add-to-cart" data-id="21" data-name="Iconic Hoodie" data-price="3699" data-image="https://images.unsplash.com/photo-1520975958225-4d1e8f4f7c18?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <span class="sale-badge">Sale</span>
+        <div class="sale-img"><img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80" alt="Thrift Jersey" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Thrift Jersey</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 3,599</div>
+            <div class="sale-discount">₹ 2,799</div>
+          </div>
+          <button class="add-to-cart" data-id="22" data-name="Thrift Jersey" data-price="2799" data-image="https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="sale-card">
+        <div class="sale-img"><img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80" alt="Top Seller Backpack" /></div>
+        <div class="sale-info">
+          <div class="sale-name">Top Seller Backpack</div>
+          <div class="sale-prices">
+            <div class="sale-original">₹ 4,999</div>
+            <div class="sale-discount">₹ 3,899</div>
+          </div>
+          <button class="add-to-cart" data-id="23" data-name="Top Seller Backpack" data-price="3899" data-image="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view-all-wrap">
+      <button class="view-all-btn" type="button">VIEW ALL</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+  <script src="checkout_patch.js"></script>
+  <script>
+    // Set your Razorpay Key ID here
+    window.RAZORPAY_KEY_ID = "rzp_test_MYKEY";
+  </script>
+  <script src="razorpay_checkout.js"></script>
+
+  <script>
+    // Keep inline HTML minimal; JS handles interactions.
+    // (Cart open/close and badge updates are managed in script.js.)
+  </script>
+
+  <!-- Footer -->
+  <footer class="footer footer-unsorted">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <img class="footer-logo-img" src="image1.jpeg" alt="UNSORTED">
+      </div>
+
+      <div class="footer-order">
+        <div class="footer-order-title">FOR ORDER INQUIRIES</div>
+        <a class="footer-order-email" href="mailto:unsortedhq@gmail.com">unsortedhq@gmail.com</a>
+      </div>
+
+      <div class="footer-accordions" data-accordion-group>
+        <div class="footer-accordion">
+          <button
+            class="footer-accordion-btn"
+            type="button"
+            aria-expanded="false"
+            aria-controls="footer-acc-knowmore"
+          >
+            <span class="footer-accordion-label">KNOW MORE</span>
+            <span class="footer-accordion-icon" aria-hidden="true">+</span>
+          </button>
+          <div id="footer-acc-knowmore" class="footer-accordion-panel" role="region" aria-label="Know More">
+            <a href="#about" class="footer-accordion-link">About Unsorted</a>
+            <a href="#contact" class="footer-accordion-link">Contact Us</a>
+            <a href="#faqs" class="footer-accordion-link">FAQs</a>
+            <a href="#blogs" class="footer-accordion-link">Blogs</a>
+          </div>
+        </div>
+
+        <div class="footer-accordion">
+          <button
+            class="footer-accordion-btn"
+            type="button"
+            aria-expanded="false"
+            aria-controls="footer-acc-policies"
+          >
+            <span class="footer-accordion-label">POLICIES</span>
+            <span class="footer-accordion-icon" aria-hidden="true">+</span>
+          </button>
+          <div id="footer-acc-policies" class="footer-accordion-panel" role="region" aria-label="Policies">
+            <a href="#privacy" class="footer-accordion-link">Privacy Policy</a>
+            <a href="#shipping" class="footer-accordion-link">Shipping Policy</a>
+            <a href="#terms" class="footer-accordion-link">Terms &amp; Conditions</a>
+            <a href="#returns" class="footer-accordion-link">Return Policy</a>
+            <a href="#contact" class="footer-accordion-link">Contact Information</a>
+          </div>
+        </div>
+
+        <div class="footer-accordion">
+          <button
+            class="footer-accordion-btn"
+            type="button"
+            aria-expanded="false"
+            aria-controls="footer-acc-signup"
+          >
+            <span class="footer-accordion-label">SIGN UP</span>
+            <span class="footer-accordion-icon" aria-hidden="true">+</span>
+          </button>
+          <div id="footer-acc-signup" class="footer-accordion-panel" role="region" aria-label="Sign Up">
+            <form class="footer-signup" action="" method="post" onsubmit="return false;">
+              <label class="footer-signup-label" for="unsorted-email">Email</label>
+              <input
+                id="unsorted-email"
+                class="footer-signup-input"
+                type="email"
+                placeholder="Enter your email"
+                required
+              >
+              <button class="footer-signup-btn" type="submit">Subscribe</button>
+              <div class="footer-signup-note">Get new drops and Unsorted updates.</div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom-unsorted">&copy; 2026, Unsorted All Rights Reserved.</div>
+  </footer>
+
+</body>
+</html>
+

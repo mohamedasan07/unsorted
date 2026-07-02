@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNSORTED Admin Login</title>
+  <link rel="stylesheet" href="/admin/admin.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    /* Absolute fallback: ensure login remains styled even if selectors fail */
+    body.admin-login-body{background:#070707;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    .admin-login-shell{width:100%;max-width:460px;display:flex;flex-direction:column;gap:14px;}
+  </style>
+</head>
+<body class="admin-login-body">
+  <div class="admin-login-shell">
+    <div class="admin-brand">
+      <div class="admin-brand-mark">U</div>
+      <div>
+        <div class="admin-brand-title">UNSORTED</div>
+        <div class="admin-brand-sub">Premium Streetwear Admin</div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h1 class="admin-h1">Admin Login</h1>
+      <p class="admin-muted">Sign in to manage products, orders, and users.</p>
+
+      <form id="loginForm" class="admin-form" autocomplete="off">
+        <label class="admin-label" for="email">Email</label>
+        <input id="email" name="email" type="email" required placeholder="admin@unsorted.com" />
+
+        <label class="admin-label" for="password">Password</label>
+        <input id="password" name="password" type="password" required placeholder="••••••••" />
+
+        <button class="admin-btn" type="submit">
+          <i class="fa-solid fa-lock"></i>
+          <span>Login</span>
+        </button>
+
+        <div id="loginError" class="admin-error" role="alert" hidden></div>
+      </form>
+
+      <div class="admin-footer-note">
+        <span class="dot"></span>
+        <span>Session cookie authentication</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/admin/login.js"></script>
+
+</body>
+</html>
+

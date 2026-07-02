@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNSORTED Admin Dashboard</title>
+  <link rel="stylesheet" href="/admin/admin.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="admin-app-body">
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="sidebar">
+      <div class="admin-sidebar-top">
+        <div class="admin-logo">
+          <div class="admin-logo-mark"><i class="fa-solid fa-gem"></i></div>
+          <div>
+            <div class="admin-logo-title">UNSORTED</div>
+            <div class="admin-logo-sub">Admin</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="admin-nav">
+        <a href="#" class="admin-nav-link active" data-view="dashboard">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="admin-nav-link" data-view="products">
+          <i class="fa-solid fa-shirt"></i>
+          <span>Products</span>
+        </a>
+        <a href="#" class="admin-nav-link" data-view="orders">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span>Orders</span>
+        </a>
+        <a href="#" class="admin-nav-link" data-view="users">
+          <i class="fa-solid fa-users"></i>
+          <span>Users</span>
+        </a>
+      </nav>
+
+      <div class="admin-sidebar-bottom">
+        <button class="admin-logout" id="logoutBtn" type="button">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <div class="admin-header-title" id="viewTitle" aria-hidden="true">Dashboard</div>
+          <div class="admin-header-sub">Premium streetwear control panel</div>
+        </div>
+
+
+        <div class="admin-header-actions">
+          <div class="admin-badge" id="sessionBadge" title="Session protected">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Protected</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-content">
+        <!-- Dashboard view -->
+        <div class="admin-view" data-view-container="dashboard">
+          <section class="admin-hero">
+            <div class="admin-hero-eyebrow">UNSORTED</div>
+            <h1 class="admin-hero-title" id="adminHeroTitle">UNSORTED CONTROL CENTER</h1>
+            <div class="admin-hero-sub">
+              PREMIUM STREETWEAR OPS — INVENTORY, ORDERS, USERS.
+            </div>
+          </section>
+
+
+          <div class="admin-grid-4 admin-grid-stats">
+            <div class="admin-stat" data-stat="products">
+              <div class="admin-stat-top">
+                <div class="admin-stat-label">Products</div>
+              </div>
+              <div class="admin-stat-value" id="statProducts">—</div>
+            </div>
+            <div class="admin-stat" data-stat="orders">
+              <div class="admin-stat-top">
+                <div class="admin-stat-label">Orders</div>
+              </div>
+              <div class="admin-stat-value" id="statOrders">—</div>
+            </div>
+            <div class="admin-stat" data-stat="users">
+              <div class="admin-stat-top">
+                <div class="admin-stat-label">Users</div>
+              </div>
+              <div class="admin-stat-value" id="statUsers">—</div>
+            </div>
+            <div class="admin-stat" data-stat="revenue">
+              <div class="admin-stat-top">
+                <div class="admin-stat-label">Revenue</div>
+              </div>
+              <div class="admin-stat-value" id="statRevenue">—</div>
+            </div>
+          </div>
+
+          <div class="admin-panel admin-panel-glass">
+            <div class="admin-panel-head">
+              <div>
+                <div class="admin-panel-title" id="opsTitle">UNSORTED Ops</div>
+                <div class="admin-muted">Real metrics from /api. Low-stock + best sellers included.</div>
+              </div>
+              <div class="admin-badge" title="Data source">
+                <i class="fa-solid fa-database"></i>
+                <span>JSON DB</span>
+              </div>
+            </div>
+
+
+            <div class="admin-chart-row">
+              <div class="admin-chart-card">
+                <div class="admin-chart-label">Active Inventory</div>
+                <div class="admin-chart-value" id="chartInventory">—</div>
+              </div>
+              <div class="admin-chart-card">
+                <div class="admin-chart-label">Recent Orders</div>
+                <div class="admin-chart-value" id="chartRecentOrders">—</div>
+              </div>
+              <div class="admin-chart-card">
+                <div class="admin-chart-label">Low Stock SKUs</div>
+                <div class="admin-chart-value" id="chartLowStock">—</div>
+              </div>
+            </div>
+
+            <div class="admin-grid-2" style="margin-top:14px; gap:14px;">
+              <div class="admin-glass-card">
+                <div class="admin-panel-title" style="margin-bottom:10px;">Best Selling Products</div>
+                <div id="bestSellers" class="admin-list"></div>
+              </div>
+
+              <div class="admin-glass-card">
+                <div class="admin-panel-title" style="margin-bottom:10px;">Low Stock Alerts</div>
+                <div id="lowStock" class="admin-list"></div>
+              </div>
+            </div>
+
+            <div class="admin-glass-card" style="margin-top:14px;">
+              <div class="admin-panel-title" style="margin-bottom:10px;">Recent Orders</div>
+              <div id="recentOrders" class="admin-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products view -->
+        <div class="admin-view" data-view-container="products" hidden>
+          <div class="admin-panel">
+            <div class="admin-panel-head">
+              <div>
+                <div class="admin-panel-title">Product Management</div>
+                <div class="admin-muted">Add, edit, delete products. Changes reflect on the customer site instantly.</div>
+              </div>
+              <button class="admin-btn-secondary" id="newProductBtn" type="button">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Product</span>
+              </button>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table" aria-label="Products table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Pricing</th>
+                    <th>Stock</th>
+                    <th>Sale</th>
+                    <th style="width: 180px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders view -->
+        <div class="admin-view" data-view-container="orders" hidden>
+          <div class="admin-panel">
+            <div class="admin-panel-head">
+              <div>
+                <div class="admin-panel-title">Order Management</div>
+                <div class="admin-muted">Update payment + fulfillment status (pending/shipped/delivered/cancelled).</div>
+              </div>
+            </div>
+
+            <div class="admin-table-wrap" style="margin-top:10px;">
+              <table class="admin-table" aria-label="Orders table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th style="width: 220px;">Update</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users view -->
+        <div class="admin-view" data-view-container="users" hidden>
+          <div class="admin-panel">
+            <div class="admin-panel-head">
+              <div>
+                <div class="admin-panel-title">User Management</div>
+                <div class="admin-muted">List users, search, delete, and view order history.</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+              <div style="flex:1; min-width:220px;">
+                <label class="admin-label" for="userSearch">Search users</label>
+                <input id="userSearch" type="text" placeholder="Type name or email..." style="width:100%;" />
+              </div>
+            </div>
+
+            <div class="admin-table-wrap" style="margin-top:10px;">
+              <table class="admin-table" aria-label="Users table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th style="width: 240px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Product modal -->
+  <div class="admin-modal" id="productModal" aria-hidden="true">
+    <div class="admin-modal-card" role="dialog" aria-modal="true" aria-label="Product modal">
+      <div class="admin-modal-head">
+        <div class="admin-modal-title" id="productModalTitle">Add Product</div>
+        <button class="admin-icon-btn" id="productModalCloseBtn" type="button" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="productForm" class="admin-form">
+        <input type="hidden" id="productId" name="productId" value="" />
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div>
+            <label class="admin-label" for="productName">Product name</label>
+            <input id="productName" name="name" type="text" required placeholder="e.g., Jersey Tee" />
+          </div>
+          <div>
+            <label class="admin-label" for="productCategory">Category</label>
+            <input id="productCategory" name="category" type="text" required placeholder="e.g., T-shirt" />
+          </div>
+        </div>
+
+        <div>
+          <label class="admin-label" for="productDescription">Description</label>
+          <textarea id="productDescription" name="description" rows="3" required placeholder="Premium streetwear build..." style="width:100%; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.25); color:#fff; outline:none; resize:vertical;"></textarea>
+        </div>
+
+        <label class="admin-label" for="productImageUrl">Image URL</label>
+        <input id="productImageUrl" name="imageUrl" type="url" required placeholder="https://..." />
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div>
+            <label class="admin-label" for="productPrice">Current price</label>
+            <input id="productPrice" name="price" type="number" required min="0" step="1" placeholder="1200" />
+          </div>
+          <div>
+            <label class="admin-label" for="productOldPrice">Old price</label>
+            <input id="productOldPrice" name="oldPrice" type="number" required min="0" step="1" placeholder="1500" />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:end;">
+          <div>
+            <label class="admin-label" for="productStockQuantity">Stock quantity</label>
+            <input id="productStockQuantity" name="stockQuantity" type="number" required min="0" step="1" placeholder="50" />
+          </div>
+          <div>
+            <label class="admin-label" for="productSale">Sale</label>
+            <div style="display:flex; gap:10px; align-items:center; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.25);">
+              <input id="productSale" name="sale" type="checkbox" />
+              <span style="font-weight:900; color:rgba(255,255,255,0.9);">Mark as on sale</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-modal-actions">
+          <button class="admin-btn" type="submit" id="productSubmitBtn">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+          </button>
+          <button class="admin-btn-secondary" type="button" id="productCancelBtn">
+            Cancel
+          </button>
+        </div>
+
+        <div id="productFormError" class="admin-error" role="alert" hidden></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin/admin.js"></script>
+
+</body>
+</html>
+
+
+

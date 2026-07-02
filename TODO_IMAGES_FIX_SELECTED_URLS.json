@@ -1,0 +1,21 @@
+{
+  "replacements": {
+    "tshirt": [
+      "https://images.pexels.com/photos/9042261/pexels-photo-9042261.jpeg?auto=compress&cs=tinysrgb&w=700"
+    ],
+    "knit": [
+      "https://images.pexels.com/photos/1019363/pexels-photo-1019363.jpeg?auto=compress&cs=tinysrgb&w=700"
+    ],
+    "streetwear": [
+      "https://images.pexels.com/photos/1103979/pexels-photo-1103979.jpeg?auto=compress&cs=tinysrgb&w=700"
+    ],
+    "sunglasses": [
+      "https://images.pexels.com/photos/1327036/pexels-photo-1327036.jpeg?auto=compress&cs=tinysrgb&w=700"
+    ],
+    "backpack": [
+      "https://images.pexels.com/photos/9042261/pexels-photo-9042261.jpeg?auto=compress&cs=tinysrgb&w=700"
+    ]
+  },
+  "note": "Some URLs selected are category placeholders due to limited verification of exact clothing type. Seed products will be updated using best matches based on product name keywords."
+}
+
