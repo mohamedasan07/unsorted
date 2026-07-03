@@ -5,27 +5,22 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import Product from './models/product.js';
+
 dotenv.config();
 
-const app = express();
-connectDB();
-app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
-
 // =====================
-// Paths / basic file DB
+// Path resolution
 // =====================
-// Resolve important paths relative to this file (backend/server.js),
-// so routes work regardless of process.cwd().
-// Note: this project uses ES modules ("type": "module"), so __dirname isn't available.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
-const productsPath = path.resolve(projectRoot, 'backend', 'seed.json');
-const dbPath = path.resolve(projectRoot, 'backend', 'db.json');
+const dbPath = path.resolve(__dirname, 'db.json');
+const imagesDir = path.resolve(projectRoot, 'images');
+const adminRoot = path.resolve(projectRoot, 'admin');
 
+// =====================
+// Helpers
+// =====================
 function safeString(v) { return String(v ?? ''); }
 function safeNumber(v, fallback = 0) {
   const n = Number(v);
@@ -33,34 +28,13 @@ function safeNumber(v, fallback = 0) {
 }
 function safeBool(v) { return Boolean(v); }
 
-const adminRoot = path.resolve(projectRoot, 'admin');
-const customerRoot = projectRoot; // projectRoot contains index.html, style.css, script.js, etc.
-
-// Ensure static roots exist (helps diagnose 404s)
-if (!fs.existsSync(adminRoot)) {
-  console.warn(`Admin static dir not found: ${adminRoot}`);
-}
-if (!fs.existsSync(path.join(customerRoot, 'index.html'))) {
-  console.warn(`Customer index.html not found in: ${customerRoot}`);
-}
-
-
-
-function loadProducts() {
-  try {
-    const raw = fs.readFileSync(productsPath, 'utf-8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed.products) ? parsed.products : [];
-  } catch {
-    return [];
-  }
-}
-
+// =====================
+// db.json — Single Source of Truth
+// =====================
 function loadDB() {
   try {
     const raw = fs.readFileSync(dbPath, 'utf-8');
     const parsed = JSON.parse(raw);
-
     return {
       products: Array.isArray(parsed?.products) ? parsed.products : [],
       orders: Array.isArray(parsed?.orders) ? parsed.orders : [],
@@ -75,123 +49,86 @@ function loadDB() {
 function persistDB(dbObj) {
   try {
     fs.writeFileSync(dbPath, JSON.stringify(dbObj, null, 2), 'utf-8');
-  } catch {
-    // no-op
+  } catch (err) {
+    console.error('[persistDB] Failed to write db.json:', err.message);
   }
 }
 
+// Load database into memory on startup
+let db = loadDB();
+
+// In-memory cart (not persisted — frontend uses localStorage)
+let cart = [];
+
+// =====================
+// Product normalization
+// =====================
 function normalizeProduct(p) {
-  const out = {
-    id: Number(p?.id),
-    name: String(p?.name ?? ''),
-    description: String(p?.description ?? ''),
-    category: String(p?.category ?? ''),
-    price: Number.isFinite(Number(p?.price)) ? Number(p?.price) : 0,
-    oldPrice: Number.isFinite(Number(p?.oldPrice)) ? Number(p?.oldPrice) : 0,
-    imageUrl: String(p?.imageUrl ?? p?.image ?? ''),
-    stockQuantity: Number.isFinite(Number(p?.stockQuantity)) ? Number(p?.stockQuantity) : 0,
-    sale: Boolean(p?.sale)
-  };
-
-  // avoid NaN IDs
-  if (!Number.isFinite(out.id) || out.id <= 0) out.id = 0;
-  return out;
-}
-
-function bootstrapDB() {
-  const dbObj = loadDB();
-
-  // If db products are empty, migrate from seed.json (customer site should keep working).
-  if (!dbObj.products.length) {
-    const seedProducts = loadProducts();
-    dbObj.products = seedProducts.map(p => ({
-      ...normalizeProduct(p),
-      // seed.json typically has only {id,name,price,image}; fill the rest for admin features
-      description: String(p?.description ?? ''),
-      category: String(p?.category ?? ''),
-      oldPrice: Number.isFinite(Number(p?.oldPrice)) ? Number(p?.oldPrice) : 0,
-      stockQuantity: Number.isFinite(Number(p?.stockQuantity)) ? Number(p?.stockQuantity) : 50,
-      sale: Boolean(p?.sale)
-    }));
-  }
-
-  // Seed a minimal user list if missing (admin auth is separate)
-  if (!dbObj.users.length) {
-    dbObj.users = [{ id: 1, name: 'Demo User', email: 'user@unsorted.com', role: 'customer' }];
-  }
-
-  // Persist to ensure db.json is populated.
-  persistDB(dbObj);
-  return dbObj;
-}
-
-const db = bootstrapDB();
-
-// Keep cart in memory (customer flows) for now.
-const cart = [];
-
-
-function getProduct(productId) {
-  return db.products.find(p => p.id === Number(productId));
-}
-
-function normalizeProductImage(p) {
-  // Keep backward compat with your seed.json field name `image`
-  // Admin UI uses `imageUrl`.
   return {
-    ...p,
-    imageUrl: p.imageUrl || p.image || ''
+    id: safeNumber(p?.id, 0),
+    name: safeString(p?.name).trim(),
+    description: safeString(p?.description).trim(),
+    category: safeString(p?.category).trim(),
+    price: safeNumber(p?.price, 0),
+    oldPrice: safeNumber(p?.oldPrice, 0),
+    imageUrl: safeString(p?.imageUrl || p?.image).trim(),
+    stockQuantity: safeNumber(p?.stockQuantity, 0),
+    sale: safeBool(p?.sale)
   };
 }
 
-function persistProductsToDB() {
-  try {
-    const current = loadDB();
-    current.products = db.products;
-
-    // keep other collections intact
-    if (Array.isArray(current.orders)) db.orders = current.orders;
-    if (Array.isArray(current.users)) db.users = current.users;
-
-    persistDB(current);
-  } catch {
-    // no-op
-  }
+function getNextId() {
+  const maxId = db.products.reduce((max, p) => Math.max(max, safeNumber(p.id, 0)), 0);
+  return maxId + 1;
 }
 
+function findProduct(id) {
+  const numId = Number(id);
+  return db.products.find(p => p.id === numId);
+}
+
+function persistProducts() {
+  const current = loadDB();
+  current.products = db.products;
+  current.orders = db.orders;
+  current.users = db.users;
+  persistDB(current);
+}
 
 // =====================
-// Session cookie auth (beginner-friendly)
+// Express App Setup
 // =====================
-const SESSION_COOKIE = 'unsorted_admin_session';
+const app = express();
+
+app.use(cors({ origin: true, credentials: true }));
+app.use(express.json());
 
 // =====================
-// Static customer + admin frontends
+// Static file serving
 // =====================
-// Requirements:
-// - Customer site must work at http://localhost:3001/
-// - Admin site must work at http://localhost:3001/admin
-// - Static files must load correctly (CSS/JS)
-// - Backend must still handle APIs only under /api
-app.use(express.static(customerRoot));
+// Serve product images
+app.use('/images', express.static(imagesDir));
 
+// Serve admin static assets only (CSS, JS — NOT index.html, which needs auth check)
+app.use('/admin', express.static(adminRoot, {
+  index: false  // Don't serve index.html automatically, let route handlers manage it
+}));
 
+// Serve customer-facing static files (index.html, style.css, script.js)
+app.use(express.static(projectRoot, {
+  index: 'index.html',
+  extensions: ['html']
+}));
+
+// =====================
+// Admin Auth (session cookie)
+// =====================
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@unsorted.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
+const SESSION_COOKIE = 'unsorted_admin_session';
 
-// Debugging: ensure login uses the expected credentials (remove later if needed)
-console.log('[admin auth config]', {
-  ADMIN_EMAIL,
-  ADMIN_PASSWORD: ADMIN_PASSWORD ? '***set***' : '***missing***',
-  SESSION_SECRET: SESSION_SECRET ? '***set***' : '***missing***',
-  SESSION_COOKIE
-});
-
-
-function escapeRegExp(s) {
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+const sessions = new Set();
 
 function parseCookies(req) {
   const header = req.headers.cookie;
@@ -205,8 +142,6 @@ function parseCookies(req) {
 }
 
 function signSession(sessionId) {
-  // Very simple signing: not production-grade.
-  // For a beginner admin panel this is enough.
   return Buffer.from(`${sessionId}:${SESSION_SECRET}`).toString('base64');
 }
 
@@ -222,20 +157,16 @@ function verifySession(signed) {
   }
 }
 
-// in-memory session store
-const sessions = new Set();
-
 function requireAdmin(req, res, next) {
   const cookies = parseCookies(req);
   const signed = cookies[SESSION_COOKIE];
   const verified = verifySession(signed);
-  if (!verified) {
-    // Redirect non-auth users to admin login
-    return res.redirect('/admin/login');
-  }
 
-  if (!sessions.has(verified.sessionId)) {
-    res.clearCookie(SESSION_COOKIE, { path: '/admin' });
+  if (!verified || !sessions.has(verified.sessionId)) {
+    // API requests get 401, page requests get redirect
+    if (req.path.startsWith('/api')) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
     return res.redirect('/admin/login');
   }
 
@@ -244,14 +175,8 @@ function requireAdmin(req, res, next) {
 }
 
 // =====================
-// Static admin + protection under /admin
+// Admin Auth Routes
 // =====================
-// 1) Serve admin static assets first (CSS/JS/login.html).
-// 2) Protect only the admin *pages* and *admin APIs*.
-//    (Admin JS loads /api/*; these will be protected later.)
-app.use('/admin', express.static(adminRoot));
-
-// Protect admin pages:
 app.get('/admin', requireAdmin, (req, res) => {
   res.sendFile(path.join(adminRoot, 'index.html'));
 });
@@ -260,91 +185,164 @@ app.get('/admin/login', (req, res) => {
   res.sendFile(path.join(adminRoot, 'login.html'));
 });
 
-
-app.post('/admin/login', express.json(), (req, res) => {
+app.post('/admin/login', (req, res) => {
   const { email, password } = req.body || {};
-  const cleanEmail = String(email || '').trim();
-  const cleanPassword = String(password || '');
+  const cleanEmail = safeString(email).trim();
+  const cleanPassword = safeString(password);
 
-  const emailOk = cleanEmail === ADMIN_EMAIL;
-  const passOk = cleanPassword === ADMIN_PASSWORD;
-
-  if (!emailOk || !passOk) {
-    console.warn('[admin login failed]', {
-      receivedEmail: cleanEmail,
-      expectedEmail: ADMIN_EMAIL,
-      passOk
-    });
+  if (cleanEmail !== ADMIN_EMAIL || cleanPassword !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
-
   const sessionId = randomUUID();
   sessions.add(sessionId);
-
   const signed = signSession(sessionId);
 
   res.cookie(SESSION_COOKIE, signed, {
     httpOnly: true,
     sameSite: 'lax',
     secure: false,
-    path: '/admin'
+    path: '/'
   });
 
   return res.json({ ok: true });
 });
 
-app.post('/admin/logout', requireAdmin, (req, res) => {
+app.post('/admin/logout', (req, res) => {
   const cookies = parseCookies(req);
   const signed = cookies[SESSION_COOKIE];
   const verified = verifySession(signed);
   if (verified) sessions.delete(verified.sessionId);
 
-  res.clearCookie(SESSION_COOKIE, { path: '/admin' });
+  res.clearCookie(SESSION_COOKIE, { path: '/' });
   res.json({ ok: true });
 });
 
 // =====================
-// Customer API (existing)
+// Products API — PUBLIC reads, ADMIN writes
 // =====================
-// =====================
-// Customer website
-// =====================
-app.get('/', (req, res) => {
-  res.sendFile(path.join(customerRoot, 'index.html'));
+
+// GET /api/products — Public
+app.get('/api/products', (req, res) => {
+  res.json(db.products.map(normalizeProduct));
+});
+
+// GET /api/products/:id — Public
+app.get('/api/products/:id', (req, res) => {
+  const product = findProduct(req.params.id);
+  if (!product) return res.status(404).json({ error: 'Product not found' });
+  res.json(normalizeProduct(product));
+});
+
+// POST /api/products — Admin only
+app.post('/api/products', requireAdmin, (req, res) => {
+  const body = req.body || {};
+
+  const name = safeString(body.name).trim();
+  const description = safeString(body.description).trim();
+  const category = safeString(body.category).trim();
+  const imageUrl = safeString(body.imageUrl || body.image).trim();
+  const price = safeNumber(body.price, -1);
+  const oldPrice = safeNumber(body.oldPrice, 0);
+  const stockQuantity = safeNumber(body.stockQuantity, -1);
+  const sale = safeBool(body.sale);
+
+  // Validation
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  if (price < 0) return res.status(400).json({ error: 'price must be a non-negative number' });
+  if (!imageUrl) return res.status(400).json({ error: 'imageUrl is required' });
+  if (stockQuantity < 0) return res.status(400).json({ error: 'stockQuantity must be a non-negative number' });
+
+  const id = getNextId();
+
+  const product = normalizeProduct({
+    id, name, description, category, price, oldPrice, imageUrl, stockQuantity, sale
+  });
+
+  db.products.push(product);
+  persistProducts();
+
+  res.status(201).json({ ok: true, product });
+});
+
+// PUT /api/products/:id — Admin only
+app.put('/api/products/:id', requireAdmin, (req, res) => {
+  const productId = Number(req.params.id);
+  const index = db.products.findIndex(p => p.id === productId);
+
+  if (index === -1) return res.status(404).json({ error: 'Product not found' });
+
+  const existing = db.products[index];
+  const body = req.body || {};
+
+  const name = safeString(body.name).trim() || existing.name;
+  const description = body.description !== undefined ? safeString(body.description).trim() : existing.description;
+  const category = body.category !== undefined ? safeString(body.category).trim() : existing.category;
+  const imageUrl = safeString(body.imageUrl || body.image).trim() || existing.imageUrl;
+  const price = body.price !== undefined ? safeNumber(body.price, existing.price) : existing.price;
+  const oldPrice = body.oldPrice !== undefined ? safeNumber(body.oldPrice, existing.oldPrice) : existing.oldPrice;
+  const stockQuantity = body.stockQuantity !== undefined ? safeNumber(body.stockQuantity, existing.stockQuantity) : existing.stockQuantity;
+  const sale = body.sale !== undefined ? safeBool(body.sale) : existing.sale;
+
+  // Validation
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  if (price < 0) return res.status(400).json({ error: 'price must be a non-negative number' });
+  if (!imageUrl) return res.status(400).json({ error: 'imageUrl is required' });
+  if (stockQuantity < 0) return res.status(400).json({ error: 'stockQuantity must be a non-negative number' });
+
+  const updated = normalizeProduct({
+    id: productId, name, description, category, price, oldPrice, imageUrl, stockQuantity, sale
+  });
+
+  db.products[index] = updated;
+  persistProducts();
+
+  res.json({ ok: true, product: updated });
+});
+
+// DELETE /api/products/:id — Admin only
+app.delete('/api/products/:id', requireAdmin, (req, res) => {
+  const productId = Number(req.params.id);
+  const index = db.products.findIndex(p => p.id === productId);
+
+  if (index === -1) return res.status(404).json({ error: 'Product not found' });
+
+  db.products.splice(index, 1);
+  persistProducts();
+
+  res.json({ ok: true });
 });
 
 // =====================
-// Customer APIs
+// Cart API (in-memory, for frontend sync)
 // =====================
-app.get('/products', (req, res) => {
-  res.json(db.products.map(normalizeProductImage));
+app.get('/cart', (req, res) => {
+  res.json({ cart });
 });
-
 
 app.post('/cart', (req, res) => {
   const { productId, quantity } = req.body || {};
-  const qty = Math.max(1, Number(quantity || 1));
+  const qty = Math.max(1, safeNumber(quantity, 1));
+  const product = findProduct(productId);
 
-  const product = getProduct(productId);
   if (!product) return res.status(404).json({ error: 'Product not found' });
 
-  const existing = db.cart.find(i => i.productId === Number(productId));
+  const existing = cart.find(i => i.productId === Number(productId));
   if (existing) {
     existing.quantity += qty;
-    return res.json({ cart: db.cart });
+    return res.json({ cart });
   }
 
-  db.cart.push({
+  cart.push({
     id: randomUUID(),
     productId: Number(productId),
     name: product.name,
     price: product.price,
-    image: product.imageUrl || product.image,
+    imageUrl: product.imageUrl,
     quantity: qty
   });
 
-  res.json({ cart: db.cart });
+  res.json({ cart });
 });
 
 app.put('/cart/:id', (req, res) => {
@@ -352,142 +350,28 @@ app.put('/cart/:id', (req, res) => {
   const { quantity } = req.body || {};
   const qty = Number(quantity);
 
-  const item = db.cart.find(i => i.productId === productId);
+  const item = cart.find(i => i.productId === productId);
   if (!item) return res.status(404).json({ error: 'Cart item not found' });
-
   if (!Number.isFinite(qty) || qty < 0) return res.status(400).json({ error: 'Invalid quantity' });
 
   if (qty === 0) {
-    db.cart = db.cart.filter(i => i.productId !== productId);
-    return res.json({ cart: db.cart });
+    cart = cart.filter(i => i.productId !== productId);
+    return res.json({ cart });
   }
 
   item.quantity = qty;
-  res.json({ cart: db.cart });
+  res.json({ cart });
 });
 
 app.delete('/cart/:id', (req, res) => {
   const productId = Number(req.params.id);
-  db.cart = db.cart.filter(i => i.productId !== productId);
-  res.json({ cart: db.cart });
-});
-
-app.get('/cart', (req, res) => {
-  res.json({ cart: db.cart });
+  cart = cart.filter(i => i.productId !== productId);
+  res.json({ cart });
 });
 
 // =====================
-// Admin API auth (partial/public)
+// Orders API — Admin only
 // =====================
-// Customer storefront must be able to load products instantly from GET /api/products.
-// Admin dashboard requires auth for CRUD + operational APIs.
-
-function requireAdminForApi(req, res, next) {
-  // Public storefront endpoint (only this is unauthenticated)
-  if (req.method === 'GET' && req.path === '/products') return next();
-
-  // Protect all remaining API endpoints
-  return requireAdmin(req, res, next);
-}
-
-app.use('/api', requireAdminForApi);
-
-
-// Products CRUD
-app.get('/api/products', async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
-});
-
-app.post('/api/products', requireAdmin, async (req, res) => {
-  const body = req.body || {};
-
-  const name = safeString(body.name).trim();
-  const description = safeString(body.description).trim();
-  const category = safeString(body.category).trim();
-  const imageUrl = safeString(body.imageUrl || body.image).trim();
-
-  const price = safeNumber(body.price, 0);
-  const oldPrice = safeNumber(body.oldPrice, 0);
-  const stockQuantity = safeNumber(body.stockQuantity, 0);
-  const sale = safeBool(body.sale);
-
-  if (!name) return res.status(400).json({ error: 'name is required' });
-  if (!Number.isFinite(price) || price < 0) return res.status(400).json({ error: 'price is invalid' });
-  if (!imageUrl) return res.status(400).json({ error: 'imageUrl is required' });
-  if (!Number.isFinite(stockQuantity) || stockQuantity < 0) return res.status(400).json({ error: 'stockQuantity is invalid' });
-
-  const maxDoc = await Product.findOne().sort({ id: -1 }).select({ id: 1 }).lean();
-  const maxId = Number(maxDoc?.id) || 0;
-  const id = maxId + 1;
-
-  const product = normalizeProduct({
-    id,
-    name,
-    description,
-    category,
-    price,
-    oldPrice,
-    imageUrl,
-    stockQuantity,
-    sale
-  });
-
-  const created = await Product.create(product);
-  res.json({ ok: true, product: created });
-});
-
-app.put('/api/products/:id', requireAdmin, async (req, res) => {
-  const productId = Number(req.params.id);
-  const p = await Product.findOne({ id: productId }).lean();
-  if (!p || !Number.isFinite(productId) || productId <= 0) return res.status(404).json({ error: 'Product not found' });
-
-  const body = req.body || {};
-
-  const name = safeString(body.name).trim() || p.name;
-  const description = safeString(body.description).trim();
-  const category = safeString(body.category).trim();
-  const imageUrl = safeString(body.imageUrl || body.image).trim() || p.imageUrl;
-
-  const price = body.price === undefined ? p.price : safeNumber(body.price, p.price);
-  const oldPrice = body.oldPrice === undefined ? p.oldPrice : safeNumber(body.oldPrice, p.oldPrice);
-  const stockQuantity = body.stockQuantity === undefined ? p.stockQuantity : safeNumber(body.stockQuantity, p.stockQuantity);
-  const sale = body.sale === undefined ? p.sale : safeBool(body.sale);
-
-  if (!name) return res.status(400).json({ error: 'name is required' });
-  if (!Number.isFinite(price) || price < 0) return res.status(400).json({ error: 'price is invalid' });
-  if (!imageUrl) return res.status(400).json({ error: 'imageUrl is required' });
-  if (!Number.isFinite(stockQuantity) || stockQuantity < 0) return res.status(400).json({ error: 'stockQuantity is invalid' });
-
-  const updated = await Product.findOneAndUpdate(
-    { id: productId },
-    {
-      $set: {
-        name,
-        description,
-        category,
-        price,
-        oldPrice,
-        imageUrl,
-        stockQuantity,
-        sale
-      }
-    },
-    { new: true }
-  ).lean();
-
-  return res.json({ ok: true, product: updated });
-});
-
-app.delete('/api/products/:id', requireAdmin, async (req, res) => {
-  const productId = Number(req.params.id);
-  const deleted = await Product.findOneAndDelete({ id: productId }).lean();
-  if (!deleted) return res.status(404).json({ error: 'Product not found' });
-  res.json({ ok: true });
-});
-
-
-// Orders
 app.get('/api/orders', requireAdmin, (req, res) => {
   const orders = (db.orders || []).map(o => ({
     id: safeNumber(o?.id, 0),
@@ -497,7 +381,7 @@ app.get('/api/orders', requireAdmin, (req, res) => {
       productId: safeNumber(it?.productId, 0),
       name: safeString(it?.name),
       priceAtOrder: safeNumber(it?.priceAtOrder, 0),
-      imageUrl: safeString(it?.imageUrl || it?.image),
+      imageUrl: safeString(it?.imageUrl),
       quantity: safeNumber(it?.quantity, 0)
     })) : [],
     paymentStatus: safeString(o?.paymentStatus),
@@ -515,24 +399,17 @@ app.put('/api/orders/:id', requireAdmin, (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found' });
 
   const body = req.body || {};
-
   if (body.paymentStatus !== undefined) order.paymentStatus = safeString(body.paymentStatus);
   if (body.orderStatus !== undefined) order.orderStatus = safeString(body.orderStatus);
 
-  // Normalize for safety
-  order.customerName = safeString(order?.customerName);
-  order.customerEmail = safeString(order?.customerEmail);
-  order.totalRevenue = safeNumber(order?.totalRevenue, 0);
-  order.createdAt = safeString(order?.createdAt);
-  order.items = Array.isArray(order?.items) ? order.items : [];
-
-  persistProductsToDB();
-
+  persistProducts();
   res.json({ ok: true, order });
 });
 
-// Users
-app.get('/api/users', (req, res) => {
+// =====================
+// Users API — Admin only
+// =====================
+app.get('/api/users', requireAdmin, (req, res) => {
   const users = (db.users || []).map(u => ({
     id: safeNumber(u?.id, 0),
     name: safeString(u?.name),
@@ -548,30 +425,20 @@ app.delete('/api/users/:id', requireAdmin, (req, res) => {
   const before = (db.users || []).length;
   db.users = (db.users || []).filter(u => safeNumber(u?.id, 0) !== userId);
   if ((db.users || []).length === before) return res.status(404).json({ error: 'User not found' });
-  persistProductsToDB();
+
+  persistProducts();
   res.json({ ok: true });
 });
 
-
+// =====================
+// Start Server
+// =====================
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || '0.0.0.0';
-async function seedProducts() {
-  const count = await Product.countDocuments();
-
-  if (count === 0) {
-    const dbData = loadDB();
-
-    await Product.insertMany(dbData.products);
-
-    console.log('Products imported to MongoDB');
-  }
-}
-
-seedProducts();
-
 
 app.listen(PORT, HOST, () => {
   console.log(`UNSORTED backend running on http://${HOST}:${PORT}`);
+  console.log(`  Products: ${db.products.length}`);
+  console.log(`  Images dir: ${imagesDir}`);
+  console.log(`  Admin: http://localhost:${PORT}/admin`);
 });
-
-

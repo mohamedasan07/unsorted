@@ -84,13 +84,21 @@ function renderProducts(list) {
 
   list.forEach(p => {
     const tr = document.createElement('tr');
+    const stockQty = Number(p.stockQuantity || 0);
+    const stockClass = stockQty <= 5 ? 'color:#ff4757;font-weight:900;' : 'color:rgba(255,255,255,0.7);';
+
     tr.innerHTML = `
       <td>${p.id}</td>
-      <td><strong>${escapeHtml(p.name)}</strong></td>
-      <td>₹${Number(p.price || 0).toLocaleString('en-IN')}</td>
       <td>
-        ${p.imageUrl ? `<a href="${p.imageUrl}" target="_blank" rel="noreferrer">Image</a>` : '<span class="admin-muted">—</span>'}
+        <strong>${escapeHtml(p.name)}</strong>
+        <div class="admin-muted" style="font-size:0.85em;margin-top:2px;">${escapeHtml(p.category || '—')}</div>
       </td>
+      <td>
+        <div>₹${Number(p.price || 0).toLocaleString('en-IN')}</div>
+        ${p.oldPrice ? `<div class="admin-muted" style="text-decoration:line-through;font-size:0.85em;">₹${Number(p.oldPrice).toLocaleString('en-IN')}</div>` : ''}
+      </td>
+      <td><span style="${stockClass}">${stockQty}</span></td>
+      <td>${p.sale ? '<span style="color:#2ed573;font-weight:900;">Yes</span>' : '<span class="admin-muted">No</span>'}</td>
       <td>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button class="admin-btn-secondary" type="button" data-action="edit" data-id="${p.id}"><i class="fa-solid fa-pen"></i><span>Edit</span></button>
@@ -115,13 +123,14 @@ function renderProducts(list) {
   });
 }
 
+
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>'"]/g, (c) => ({
     '&': '&amp;',
-    '<': '<',
-    '>': '>',
+    '<': '&lt;',
+    '>': '&gt;',
     "'": '&#39;',
-    '"': '"'
+    '"': '&quot;'
   }[c]));
 }
 
