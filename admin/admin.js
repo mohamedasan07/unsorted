@@ -45,10 +45,15 @@ sidebarLinks.forEach(a => {
   });
 });
 
+const API_BASE =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : 'https://unsorted-backend.onrender.com';
+
 const API = {
-  products: '/api/products',
-  orders: '/api/orders',
-  users: '/api/users'
+  products: `${API_BASE}/api/products`,
+  orders: `${API_BASE}/api/orders`,
+  users: `${API_BASE}/api/users`
 };
 
 async function apiJson(url, opts = {}) {
@@ -522,7 +527,7 @@ async function loadIfNeeded(view) {
 // Logout
 elById('logoutBtn')?.addEventListener('click', async () => {
   try {
-    await apiJson('/admin/logout', { method: 'POST' });
+    await apiJson(`${API_BASE}/admin/logout`,  { method: 'POST' });
   } finally {
     window.location.href = '/admin/login';
   }
