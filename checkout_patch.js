@@ -16,7 +16,10 @@
         return;
       }
 
-      const API_BASE = 'http://localhost:3001';
+      const API_BASE =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : 'https://unsorted-backend.onrender.com';
 
       // Optional: sync cart to backend (simple strategy: push each item)
       // Backend cart is in-memory and keyed by productId.

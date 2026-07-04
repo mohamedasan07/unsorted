@@ -100,7 +100,14 @@ function persistProducts() {
 // =====================
 const app = express();
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3001",
+    "https://unsorted-swart.vercel.app"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // =====================
@@ -236,7 +243,7 @@ app.get('/api/products/:id', (req, res) => {
 });
 
 // POST /api/products — Admin only
-app.post('/api/products', (req, res) => {
+app.post('/api/products', requireAdmin, (req, res) => {
   const body = req.body || {};
 
   const name = safeString(body.name).trim();
@@ -267,7 +274,7 @@ app.post('/api/products', (req, res) => {
 });
 
 // PUT /api/products/:id — Admin only
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id', requireAdmin, (req, res) => {
   const productId = Number(req.params.id);
   const index = db.products.findIndex(p => p.id === productId);
 
@@ -302,7 +309,7 @@ app.put('/api/products/:id', (req, res) => {
 });
 
 // DELETE /api/products/:id — Admin only
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', requireAdmin, (req, res) => {
   const productId = Number(req.params.id);
   const index = db.products.findIndex(p => p.id === productId);
 
