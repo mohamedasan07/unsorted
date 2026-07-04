@@ -2,7 +2,7 @@
 // api.js — Single API service for all data fetching
 // =====================
 
-const API_BASE = '';  // Same origin (Vite proxy handles routing)
+const API_BASE = 'https://unsorted-backend.onrender.com'; // Same origin (Vite proxy handles routing)
 
 /**
  * Generic fetch wrapper with error handling
