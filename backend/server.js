@@ -162,7 +162,7 @@ function requireAdmin(req, res, next) {
   const signed = cookies[SESSION_COOKIE];
   const verified = verifySession(signed);
 
-  if (!verified || !sessions.has(verified.sessionId)) {
+  if (!verified) {
     // API requests get 401, page requests get redirect
     if (req.path.startsWith('/api')) {
       return res.status(401).json({ error: 'Authentication required' });

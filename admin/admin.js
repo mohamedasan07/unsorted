@@ -15,17 +15,14 @@ function setView(view) {
   });
 
   if (view === 'dashboard') {
-    // UI-only hero copy
     if (viewTitle) viewTitle.textContent = 'Dashboard';
   } else {
-
     if (viewTitle) {
       const pretty = view.charAt(0).toUpperCase() + view.slice(1);
       viewTitle.textContent = pretty;
     }
   }
 }
-
 
 function fmtMoney(v) {
   const n = Number(v);
@@ -38,15 +35,6 @@ function fmtStock(v) {
   if (!Number.isFinite(n)) return '0';
   return String(n);
 }
-
-function fmtBool(v) {
-  return Boolean(v) ? 'Yes' : 'No';
-}
-
-function safeText(v) {
-  return String(v ?? '');
-}
-
 
 sidebarLinks.forEach(a => {
   a.addEventListener('click', (e) => {
@@ -77,6 +65,21 @@ async function apiJson(url, opts = {}) {
   return data;
 }
 
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>'"]/g, (c) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[c]));
+}
+
+function safeText(v) {
+  return String(v ?? '');
+}
+
+// --- PRODUCTS ---
 function renderProducts(list) {
   const tbody = elById('productsTbody');
   if (!tbody) return;
@@ -88,7 +91,7 @@ function renderProducts(list) {
     const stockClass = stockQty <= 5 ? 'color:#ff4757;font-weight:900;' : 'color:rgba(255,255,255,0.7);';
 
     tr.innerHTML = `
-      <td>${p.id}</td>
+      <td>${escapeHtml(p.id)}</td>
       <td>
         <strong>${escapeHtml(p.name)}</strong>
         <div class="admin-muted" style="font-size:0.85em;margin-top:2px;">${escapeHtml(p.category || '—')}</div>
@@ -101,38 +104,47 @@ function renderProducts(list) {
       <td>${p.sale ? '<span style="color:#2ed573;font-weight:900;">Yes</span>' : '<span class="admin-muted">No</span>'}</td>
       <td>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="admin-btn-secondary" type="button" data-action="edit" data-id="${p.id}"><i class="fa-solid fa-pen"></i><span>Edit</span></button>
-          <button class="admin-btn-secondary" type="button" data-action="delete" data-id="${p.id}" style="border-color: rgba(255,71,87,0.35); background: rgba(255,71,87,0.08);"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
+          <button class="admin-btn-secondary" type="button" data-action="edit" data-id="${escapeHtml(p.id)}"><i class="fa-solid fa-pen"></i><span>Edit</span></button>
+          <button class="admin-btn-secondary" type="button" data-action="delete" data-id="${escapeHtml(p.id)}" style="border-color: rgba(255,71,87,0.35); background: rgba(255,71,87,0.08);"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
         </div>
       </td>
     `;
-
     tbody.appendChild(tr);
   });
-
-  tbody.querySelectorAll('button[data-action="edit"]').forEach(btn => {
-    btn.addEventListener('click', () => openProductModal('edit', btn.dataset.id));
-  });
-  tbody.querySelectorAll('button[data-action="delete"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      if (!confirm('Delete product #' + id + '?')) return;
-      await apiJson(`${API.products}/${id}`, { method: 'DELETE' });
-      await refreshProducts();
-    });
-  });
 }
 
-
-function escapeHtml(str) {
-  return String(str ?? '').replace(/[&<>'"]/g, (c) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    "'": '&#39;',
-    '"': '&quot;'
-  }[c]));
+async function refreshProducts() {
+  const list = await apiJson(API.products);
+  renderProducts(list);
 }
+
+async function deleteProduct(id) {
+  if (!confirm('Delete product #' + id + '?')) return;
+  try {
+    await apiJson(API.products + '/' + id, { method: 'DELETE' });
+    await refreshProducts();
+  } catch (err) {
+    console.error('Delete failed:', err);
+    alert('Failed to delete product: ' + err.message);
+  }
+}
+
+// Event Delegation for Edit and Delete buttons
+elById('productsTbody')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+
+  if (action === 'edit') {
+    e.preventDefault();
+    openProductModal('edit', id);
+  } else if (action === 'delete') {
+    e.preventDefault();
+    deleteProduct(id);
+  }
+});
 
 // Product modal
 const modal = elById('productModal');
@@ -146,6 +158,11 @@ const productIdEl = elById('productId');
 const nameEl = elById('productName');
 const priceEl = elById('productPrice');
 const imageUrlEl = elById('productImageUrl');
+const categoryEl = elById('productCategory');
+const descriptionEl = elById('productDescription');
+const oldPriceEl = elById('productOldPrice');
+const stockQuantityEl = elById('productStockQuantity');
+const saleEl = elById('productSale');
 
 function openModal() { modal?.classList.add('active'); modal?.setAttribute('aria-hidden', 'false'); }
 function closeModal() { modal?.classList.remove('active'); modal?.setAttribute('aria-hidden', 'true'); }
@@ -157,31 +174,22 @@ modal?.addEventListener('click', (e) => {
 });
 
 let currentMode = 'add';
-let currentEditId = null;
-
-const categoryEl = elById('productCategory');
-const descriptionEl = elById('productDescription');
-const oldPriceEl = elById('productOldPrice');
-const stockQuantityEl = elById('productStockQuantity');
-const saleEl = elById('productSale');
 
 async function openProductModal(mode, id) {
   currentMode = mode;
-  currentEditId = id;
-  errorEl.hidden = true;
+  if (errorEl) errorEl.hidden = true;
 
   if (mode === 'add') {
-    productModalTitle.textContent = 'Add Product';
-    productIdEl.value = '';
-    nameEl.value = '';
-    priceEl.value = '';
-    imageUrlEl.value = '';
-
-    categoryEl && (categoryEl.value = '');
-    descriptionEl && (descriptionEl.value = '');
-    oldPriceEl && (oldPriceEl.value = '');
-    stockQuantityEl && (stockQuantityEl.value = '');
-    saleEl && (saleEl.checked = false);
+    if (productModalTitle) productModalTitle.textContent = 'Add Product';
+    if (productIdEl) productIdEl.value = '';
+    if (nameEl) nameEl.value = '';
+    if (priceEl) priceEl.value = '';
+    if (imageUrlEl) imageUrlEl.value = '';
+    if (categoryEl) categoryEl.value = '';
+    if (descriptionEl) descriptionEl.value = '';
+    if (oldPriceEl) oldPriceEl.value = '';
+    if (stockQuantityEl) stockQuantityEl.value = '';
+    if (saleEl) saleEl.checked = false;
 
     openModal();
     return;
@@ -194,66 +202,54 @@ async function openProductModal(mode, id) {
     return;
   }
 
-  productModalTitle.textContent = 'Edit Product #' + p.id;
-  productIdEl.value = p.id;
-  nameEl.value = safeText(p.name);
-  priceEl.value = p.price ?? '';
-  imageUrlEl.value = safeText(p.imageUrl);
-
-  categoryEl && (categoryEl.value = safeText(p.category));
-  descriptionEl && (descriptionEl.value = safeText(p.description));
-  oldPriceEl && (oldPriceEl.value = p.oldPrice ?? '');
-  stockQuantityEl && (stockQuantityEl.value = p.stockQuantity ?? '');
-  saleEl && (saleEl.checked = Boolean(p.sale));
+  if (productModalTitle) productModalTitle.textContent = 'Edit Product #' + p.id;
+  if (productIdEl) productIdEl.value = p.id;
+  if (nameEl) nameEl.value = safeText(p.name);
+  if (priceEl) priceEl.value = p.price ?? '';
+  if (imageUrlEl) imageUrlEl.value = safeText(p.imageUrl);
+  if (categoryEl) categoryEl.value = safeText(p.category);
+  if (descriptionEl) descriptionEl.value = safeText(p.description);
+  if (oldPriceEl) oldPriceEl.value = p.oldPrice ?? '';
+  if (stockQuantityEl) stockQuantityEl.value = p.stockQuantity ?? '';
+  if (saleEl) saleEl.checked = Boolean(p.sale);
 
   openModal();
 }
 
-elById('newProductBtn')?.addEventListener('click', () => openProductModal('add'));
+elById('newProductBtn')?.addEventListener('click', () => openProductModal('add', null));
 
 productForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  errorEl.hidden = true;
+  if (errorEl) errorEl.hidden = true;
 
-  const name = nameEl.value.trim();
-  const price = Number(priceEl.value);
+  const name = nameEl?.value.trim();
+  const price = Number(priceEl?.value);
   const oldPrice = Number(oldPriceEl?.value);
   const stockQuantity = Number(stockQuantityEl?.value);
-  const imageUrl = imageUrlEl.value.trim();
-
+  const imageUrl = imageUrlEl?.value.trim();
   const category = categoryEl?.value?.trim?.() ?? '';
   const description = descriptionEl?.value?.trim?.() ?? '';
   const sale = Boolean(saleEl?.checked);
 
   try {
+    const body = JSON.stringify({ name, description, category, price, oldPrice, stockQuantity, sale, imageUrl });
     if (currentMode === 'add') {
-      await apiJson(API.products, {
-        method: 'POST',
-        body: JSON.stringify({ name, description, category, price, oldPrice, stockQuantity, sale, imageUrl })
-      });
+      await apiJson(API.products, { method: 'POST', body });
     } else {
       const id = productIdEl.value;
-      await apiJson(`${API.products}/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ name, description, category, price, oldPrice, stockQuantity, sale, imageUrl })
-      });
+      await apiJson(API.products + '/' + id, { method: 'PUT', body });
     }
-
     closeModal();
     await refreshProducts();
   } catch (err) {
-    errorEl.textContent = err.message || 'Save failed';
-    errorEl.hidden = false;
+    if (errorEl) {
+      errorEl.textContent = err.message || 'Save failed';
+      errorEl.hidden = false;
+    }
   }
 });
 
-
-async function refreshProducts() {
-  const list = await apiJson(API.products);
-  renderProducts(list);
-}
-
-// Orders / Users
+// --- ORDERS ---
 async function loadOrders() {
   const data = await apiJson(API.orders);
   const tbody = elById('ordersTbody');
@@ -265,7 +261,6 @@ async function loadOrders() {
   orders.forEach(o => {
     const tr = document.createElement('tr');
     const itemsCount = Array.isArray(o?.items) ? o.items.reduce((sum,it)=> sum + Number(it?.quantity || 0), 0) : 0;
-
     const payment = safeText(o?.paymentStatus || 'pending');
     const status = safeText(o?.orderStatus || 'pending');
     const updateId = safeText(o?.id);
@@ -303,26 +298,38 @@ async function loadOrders() {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td colspan="6" class="admin-muted">No orders found.</td>`;
     tbody.appendChild(tr);
-    return;
   }
-
-  tbody.querySelectorAll('button[data-action="updateOrder"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      const paymentSel = tbody.querySelector(`select[data-id="${CSS.escape(id)}"][data-action="payment"]`);
-      const statusSel = tbody.querySelector(`select[data-id="${CSS.escape(id)}"][data-action="status"]`);
-      const paymentStatus = paymentSel?.value || 'pending';
-      const orderStatus = statusSel?.value || 'pending';
-
-      await apiJson(`${API.orders}/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ paymentStatus, orderStatus })
-      });
-      await loadOrders();
-    });
-  });
 }
 
+// Single Event Delegation for Orders
+elById('ordersTbody')?.addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action="updateOrder"]');
+  if (!btn) return;
+  e.preventDefault();
+
+  const id = btn.dataset.id;
+  const tbody = elById('ordersTbody');
+  
+  // Clean concatenation to avoid template literal escaping issues completely
+  const paymentSel = tbody.querySelector('select[data-id="' + id + '"][data-action="payment"]');
+  const statusSel = tbody.querySelector('select[data-id="' + id + '"][data-action="status"]');
+  
+  const paymentStatus = paymentSel ? paymentSel.value : 'pending';
+  const orderStatus = statusSel ? statusSel.value : 'pending';
+
+  try {
+    await apiJson(API.orders + '/' + id, {
+      method: 'PUT',
+      body: JSON.stringify({ paymentStatus, orderStatus })
+    });
+    await loadOrders();
+  } catch (err) {
+    console.error('Update order failed:', err);
+    alert('Failed to update order: ' + err.message);
+  }
+});
+
+// --- USERS ---
 async function loadUsers() {
   const data = await apiJson(API.users);
   const tbody = elById('usersTbody');
@@ -354,18 +361,8 @@ async function loadUsers() {
       tr.innerHTML = `<td colspan="4" class="admin-muted">No users found.</td>`;
       tbody.appendChild(tr);
     }
-
-    tbody.querySelectorAll('button[data-action="deleteUser"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        if (!confirm('Delete user #' + id + '?')) return;
-        await apiJson(`${API.users}/${id}`, { method: 'DELETE' });
-        await loadUsers();
-      });
-    });
   }
 
-  // Search (client-side)
   const searchInput = elById('userSearch');
   const query = () => safeText(searchInput?.value || '').trim().toLowerCase();
   const applySearch = () => {
@@ -385,7 +382,24 @@ async function loadUsers() {
   applySearch();
 }
 
+// Single Event Delegation for Delete User
+elById('usersTbody')?.addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action="deleteUser"]');
+  if (!btn) return;
+  e.preventDefault();
 
+  const id = btn.dataset.id;
+  if (!confirm('Delete user #' + id + '?')) return;
+  try {
+    await apiJson(API.users + '/' + id, { method: 'DELETE' });
+    await loadUsers();
+  } catch (err) {
+    console.error('Delete user failed:', err);
+    alert('Failed to delete user: ' + err.message);
+  }
+});
+
+// --- DASHBOARD STATS ---
 async function loadDashboardStats() {
   const productsRes = await apiJson(API.products);
   const ordersRes = await apiJson(API.orders);
@@ -414,7 +428,6 @@ async function loadDashboardStats() {
   const lowStockThreshold = 5;
   const lowStockSkus = products.filter(p => Number(p?.stockQuantity || 0) <= lowStockThreshold);
 
-  // Best sellers by ordered quantity
   const qtyByProduct = new Map();
   orders.forEach(o => {
     (o?.items || []).forEach(it => {
@@ -430,7 +443,6 @@ async function loadDashboardStats() {
     return { product: p, qty };
   });
 
-  // Recent orders list
   const recentOrders = orders.slice().sort((a,b) => (b?.createdAt||'').localeCompare(a?.createdAt||'')).slice(0, 5);
 
   if (statProducts) statProducts.textContent = String(products.length);
@@ -489,7 +501,6 @@ async function loadDashboardStats() {
   }
 }
 
-
 let loaded = { dashboard:false, products:false, orders:false, users:false };
 async function loadIfNeeded(view) {
   if (loaded[view]) return;
@@ -522,4 +533,3 @@ setView('dashboard');
 loadIfNeeded('dashboard').catch(err => {
   alert(err.message || 'Failed to load dashboard');
 });
-
