@@ -207,11 +207,11 @@ app.post('/admin/login', (req, res) => {
   const signed = signSession(sessionId);
 
   res.cookie(SESSION_COOKIE, signed, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: false,
-    path: '/'
-  });
+  httpOnly: true,
+  sameSite: 'none',
+  secure: true,
+  path: '/'
+});
 
   return res.json({ ok: true });
 });
