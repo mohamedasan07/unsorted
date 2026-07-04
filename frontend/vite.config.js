@@ -1,5 +1,5 @@
 export default {
-  root: '.',
+  root: '..',
   server: {
     port: 5173,
     proxy: {

@@ -503,7 +503,7 @@ async function loadDashboardStats() {
 
 let loaded = { dashboard:false, products:false, orders:false, users:false };
 async function loadIfNeeded(view) {
-  if (loaded[view]) return;
+  // Always fetch fresh data to prevent out-of-sync bugs
   if (view === 'dashboard') {
     await loadDashboardStats();
   }

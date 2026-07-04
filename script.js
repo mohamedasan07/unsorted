@@ -108,7 +108,8 @@ function toggleMenu() {
   document.getElementById('menu').classList.toggle('active');
 }
 
-function toggleSearch() {
+function toggleSearch(e) {
+  if (e) e.stopPropagation();
   document.getElementById('searchModal').classList.toggle('active');
 }
 
@@ -124,7 +125,8 @@ function toggleCart() {
   if (next) renderCart();
 }
 
-function toggleLogin() {
+function toggleLogin(e) {
+  if (e) e.stopPropagation();
   document.getElementById('loginModal').classList.toggle('active');
 }
 

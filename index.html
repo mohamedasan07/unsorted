@@ -16,7 +16,7 @@
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
     <a href="#reviews">Review</a>
-    <a onclick="toggleLogin(); return false;">Login</a>
+    <a onclick="toggleLogin(event); return false;">Login</a>
   </div>
 
   <!-- Login Modal -->
@@ -64,7 +64,7 @@
 
     <!-- Right: Icons -->
     <div class="right">
-      <i class="fas fa-search" onclick="toggleSearch()"></i>
+      <i class="fas fa-search" onclick="toggleSearch(event)"></i>
       <div style="position: relative;">
         <i class="fas fa-shopping-cart" id="cartOpenBtn" style="font-size: 20px;" onclick="toggleCart()"></i>
         <div class="cart-badge" id="cartBadge">0</div>
@@ -187,6 +187,7 @@
   </section>
 
   <script src="script.js"></script>
+  <script src="razorpay_checkout.js"></script>
 
   <!-- Footer -->
   <footer class="footer footer-unsorted">

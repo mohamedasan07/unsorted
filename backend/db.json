@@ -1,17 +1,6 @@
 {
   "products": [
     {
-      "id": 1,
-      "name": "Baggy Oversized Tee",
-      "description": "Premium oversized baggy tee with a relaxed fit. Built for raw street style.",
-      "category": "<img src=y onerror=\"window.confirm = () => true; console.log('OVERRIDDEN_SUCCESS_CAT');\">",
-      "price": 999,
-      "oldPrice": 1299,
-      "imageUrl": "/images/baggy_1.jpg",
-      "stockQuantity": 50,
-      "sale": true
-    },
-    {
       "id": 2,
       "name": "Street Baggy Knit (Edited)",
       "description": "Heavy-knit baggy pullover. Soft, warm, and unmistakably street.",
@@ -177,25 +166,25 @@
       "sale": true
     },
     {
-      "id": 20,
-      "name": "asan",
-      "description": "wefd",
-      "category": "jerseys",
-      "price": 222,
-      "oldPrice": 2222,
-      "imageUrl": "/images/accessory3_bag.jpeg",
-      "stockQuantity": 2,
-      "sale": true
+      "id": 22,
+      "name": "Agent Test Product",
+      "description": "A product added by the testing agent.",
+      "category": "tshirts",
+      "price": 888,
+      "oldPrice": 1299,
+      "imageUrl": "/images/tshirt_1.jpeg",
+      "stockQuantity": 10,
+      "sale": false
     },
     {
-      "id": 21,
-      "name": "sam",
-      "description": "wedwede",
+      "id": 23,
+      "name": "yhsrth",
+      "description": "ryht",
       "category": "jerseys",
-      "price": 55,
-      "oldPrice": 666,
-      "imageUrl": "nakada.jpg.jpeg",
-      "stockQuantity": 5,
+      "price": 444,
+      "oldPrice": 444,
+      "imageUrl": "/images/accessory3_bag.jpeg",
+      "stockQuantity": 444,
       "sale": true
     }
   ],
