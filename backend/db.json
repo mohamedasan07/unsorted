@@ -1,61 +1,6 @@
 {
   "products": [
     {
-      "id": 2,
-      "name": "Street Baggy Knit (Edited)",
-      "description": "Heavy-knit baggy pullover. Soft, warm, and unmistakably street.",
-      "category": "baggy",
-      "price": 1399,
-      "oldPrice": 1799,
-      "imageUrl": "/images/baggy_2.jpg",
-      "stockQuantity": 40,
-      "sale": true
-    },
-    {
-      "id": 3,
-      "name": "Baggy Mesh Layer",
-      "description": "Layered mesh baggy top. Breathable with an edge.",
-      "category": "baggy",
-      "price": 899,
-      "oldPrice": 1199,
-      "imageUrl": "/images/baggy_3.jpg",
-      "stockQuantity": 35,
-      "sale": true
-    },
-    {
-      "id": 4,
-      "name": "Baggy Heavy Jersey",
-      "description": "Heavyweight jersey with a relaxed baggy silhouette. Statement piece.",
-      "category": "baggy",
-      "price": 1649,
-      "oldPrice": 2099,
-      "imageUrl": "/images/lfdy_baggy_denim.jpg",
-      "stockQuantity": 25,
-      "sale": false
-    },
-    {
-      "id": 8,
-      "name": "Button-Up Overshirt",
-      "description": "Classic overshirt with premium stitching. Layer it or rock it solo.",
-      "category": "shirts",
-      "price": 1999,
-      "oldPrice": 2499,
-      "imageUrl": "/images/shirt_1.jpg",
-      "stockQuantity": 30,
-      "sale": true
-    },
-    {
-      "id": 9,
-      "name": "Flannel Work Shirt",
-      "description": "Rugged flannel work shirt. Warm, tough, and effortlessly cool.",
-      "category": "shirts",
-      "price": 1299,
-      "oldPrice": 1799,
-      "imageUrl": "/images/shirt_2.jpg",
-      "stockQuantity": 45,
-      "sale": true
-    },
-    {
       "id": 10,
       "name": "Hawaiian Shirt",
       "description": "Bold Hawaiian print shirt. Tropical vibes, streetwear attitude.",
@@ -178,13 +123,35 @@
     },
     {
       "id": 23,
-      "name": "yhsrth",
-      "description": "ryht",
+      "name": "hamadh ismail",
+      "description": "s",
       "category": "jerseys",
-      "price": 444,
-      "oldPrice": 444,
+      "price": 23,
+      "oldPrice": 33,
+      "imageUrl": "nakada.jpg.jpeg",
+      "stockQuantity": 3,
+      "sale": false
+    },
+    {
+      "id": 24,
+      "name": "sam",
+      "description": "rf",
+      "category": "accessories",
+      "price": 3,
+      "oldPrice": 33,
       "imageUrl": "/images/accessory3_bag.jpeg",
-      "stockQuantity": 444,
+      "stockQuantity": 33,
+      "sale": false
+    },
+    {
+      "id": 25,
+      "name": "asan",
+      "description": "wed",
+      "category": "jerseys",
+      "price": 33,
+      "oldPrice": 3,
+      "imageUrl": "acmilan.jpg.jpeg",
+      "stockQuantity": 33,
       "sale": true
     }
   ],
