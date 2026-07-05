@@ -78,17 +78,6 @@
       "sale": true
     },
     {
-      "id": 17,
-      "name": "Retro Sunglasses",
-      "description": "Throwback retro sunglasses. UV protection with serious style.",
-      "category": "accessories",
-      "price": 1299,
-      "oldPrice": 1799,
-      "imageUrl": "/images/accessory2_belt.jpeg",
-      "stockQuantity": 50,
-      "sale": false
-    },
-    {
       "id": 18,
       "name": "Chunky Chain Necklace",
       "description": "Heavy chunky chain necklace. Bold accessory for bold fits.",
@@ -152,6 +141,39 @@
       "oldPrice": 3,
       "imageUrl": "acmilan.jpg.jpeg",
       "stockQuantity": 33,
+      "sale": true
+    },
+    {
+      "id": 26,
+      "name": "jgughglih",
+      "description": "liuyg",
+      "category": "jerseys",
+      "price": 33,
+      "oldPrice": 333,
+      "imageUrl": "/images/baggy_2.jpg",
+      "stockQuantity": 333,
+      "sale": false
+    },
+    {
+      "id": 27,
+      "name": "tttt",
+      "description": "ttth",
+      "category": "baggy",
+      "price": 444,
+      "oldPrice": 4444,
+      "imageUrl": "acmilan.jpg.jpeg",
+      "stockQuantity": 33,
+      "sale": true
+    },
+    {
+      "id": 28,
+      "name": "Oxford Shirt suiiii",
+      "description": "test123",
+      "category": "baggy",
+      "price": 1,
+      "oldPrice": 111113333,
+      "imageUrl": "/images/baggy_2.jpg",
+      "stockQuantity": 9,
       "sale": true
     }
   ],

@@ -4,7 +4,10 @@
 // =====================
 
 // Backend base URL
-const API_BASE = 'https://unsorted-backend.onrender.com';
+const API_BASE =
+  location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : 'https://unsorted-backend.onrender.com';
 
 // =====================
 // Global state
@@ -484,9 +487,9 @@ function productCardHTML(p) {
 }
 
 function loadProductsAndRender() {
-  const API_BASE = 'https://unsorted-backend.onrender.com';
+  
 
-  return fetch(api)
+  return fetch(`${API_BASE}/api/products`)
     .then(r => {
       if (!r.ok) throw new Error(`API error ${r.status}`);
       return r.json();
